@@ -34,6 +34,7 @@ namespace TracerDll
                 _threadResult.TryAdd(threadId, new ThreadResult(threadId));
                 _threadResult[threadId].threadId = threadId;
                 _threadResult[threadId].childMethods = new ConcurrentBag<MethodResult>();
+                _threadResult[threadId].time = 0;
             }
             _startTime[threadId].Push(method);
             _threadResult[threadId].childMethods.Add(method);
@@ -49,6 +50,7 @@ namespace TracerDll
                 if (method != null)
                 {
                     method.time = _stopwatch.ElapsedMilliseconds - method.time;
+                    _threadResult[threadId].time += method.time;
                 }
             }
         }
