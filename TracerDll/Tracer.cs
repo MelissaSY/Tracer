@@ -16,7 +16,6 @@ namespace TracerDll
             _startTime = new ConcurrentDictionary<int, ConcurrentStack<MethodResult>>();
             _stopwatch = new Stopwatch();
         }
-
         public void StartTrace() 
         {
             if(!_stopwatch.IsRunning)
@@ -40,6 +39,7 @@ namespace TracerDll
             _threadResult[threadId].childMethods.Add(method);
             method.time = _stopwatch.ElapsedMilliseconds;
         }
+        
         public void StopTrace()
         {
             int threadId = Thread.CurrentThread.ManagedThreadId;
