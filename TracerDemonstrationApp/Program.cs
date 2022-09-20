@@ -1,5 +1,6 @@
 ﻿using TracerDll;
 using System.Threading;
+using System.IO;
 namespace TracerDemonstrationApp
 {
     internal class Program
@@ -24,9 +25,13 @@ namespace TracerDemonstrationApp
             JsonTraceResult jsonSerializer = new JsonTraceResult();
             string xmlResult = xmlSerializer.Serialize(result);
             string jsonResult = jsonSerializer.Serialize(result);
-            
-            Console.WriteLine(xmlResult);
-            Console.WriteLine(jsonResult);
+
+            ResultWriter resultWriter = new ResultWriter();
+            resultWriter.Write(xmlResult, Console.Out);
+            resultWriter.Write(jsonResult, Console.Out);
+
+
+            resultWriter.Write(jsonResult, "fff.json");
 
             Console.ReadLine();
         }
@@ -72,6 +77,7 @@ namespace TracerDemonstrationApp
         public void RecourseMethod()
         {
             _tracer.StartTrace();
+            Thread.Sleep(10 - _iterations);
             if(_iterations < 2)
             {
                 _iterations++;
