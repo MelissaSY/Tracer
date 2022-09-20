@@ -18,6 +18,16 @@ namespace TracerDemonstrationApp
             thread1.Join();
             thread2.Join();
             TraceResult traceResult = tracer.GetTraceResult();
+
+            TraceResultSerializable result = new TraceResultSerializable(traceResult);
+            XmlTraceResult xmlSerializer = new XmlTraceResult();
+            JsonTraceResult jsonSerializer = new JsonTraceResult();
+            string xmlResult = xmlSerializer.Serialize(result);
+            string jsonResult = jsonSerializer.Serialize(result);
+            
+            Console.WriteLine(xmlResult);
+            Console.WriteLine(jsonResult);
+
             Console.ReadLine();
         }
     }
