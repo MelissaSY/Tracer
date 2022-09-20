@@ -10,8 +10,9 @@ namespace TracerDll
 {
     public class JsonTraceResult: ISerializer
     {
-        public string Serialize(TraceResultSerializable traceResult)
+        public string Serialize(TraceResult traceReadonlyResult)
         {
+            TraceResultSerializable traceResult = new TraceResultSerializable(traceReadonlyResult);
             string result;
             JsonSerializerOptions options = new JsonSerializerOptions()
             {

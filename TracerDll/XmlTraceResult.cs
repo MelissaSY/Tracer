@@ -11,9 +11,10 @@ namespace TracerDll
 {
     public class XmlTraceResult: ISerializer
     {
-        public string Serialize(TraceResultSerializable traceResult)
+        public string Serialize(TraceResult traceReadonlyResult)
         {
             string result;
+            TraceResultSerializable traceResult = new TraceResultSerializable(traceReadonlyResult); 
             XmlSerializer serializer = new XmlSerializer(traceResult.GetType());
             using(StringWriter sw = new StringWriter())
             {

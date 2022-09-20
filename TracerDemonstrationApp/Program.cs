@@ -20,11 +20,11 @@ namespace TracerDemonstrationApp
             thread2.Join();
             TraceResult traceResult = tracer.GetTraceResult();
 
-            TraceResultSerializable result = new TraceResultSerializable(traceResult);
+        //    TraceResultSerializable result = new TraceResultSerializable(traceResult);
             XmlTraceResult xmlSerializer = new XmlTraceResult();
             JsonTraceResult jsonSerializer = new JsonTraceResult();
-            string xmlResult = xmlSerializer.Serialize(result);
-            string jsonResult = jsonSerializer.Serialize(result);
+            string xmlResult = xmlSerializer.Serialize(traceResult);
+            string jsonResult = jsonSerializer.Serialize(traceResult);
 
             ResultWriter resultWriter = new ResultWriter();
             resultWriter.Write(xmlResult, Console.Out);
@@ -32,6 +32,7 @@ namespace TracerDemonstrationApp
 
 
             resultWriter.Write(jsonResult, "fff.json");
+            resultWriter.Write(xmlResult, "fff.xml");
 
             Console.ReadLine();
         }

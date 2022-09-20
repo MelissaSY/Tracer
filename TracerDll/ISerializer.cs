@@ -8,6 +8,6 @@ namespace TracerDll
 {
     public interface ISerializer
     {
-        public string Serialize(TraceResultSerializable traceResult);
+        public string Serialize(TraceResult traceReadonlyResult);
     }
 }
