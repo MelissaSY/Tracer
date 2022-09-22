@@ -87,17 +87,31 @@ namespace TestTracer
                 }
             }
         }
+        public void InnerMethod(Tracer tracer)
+        {
+            tracer.StartTrace();
+            Thread.Sleep(100);
+            tracer.StopTrace();
+        }
+        public void OuterMethod(Tracer tracer)
+        {
+            tracer.StartTrace();
+            InnerMethod(tracer);
+            Thread.Sleep(50);
+            tracer.StopTrace();
+        }
         [TestMethod]
-        public void SimpleMethod_TwoThreads()
+        public void SimpleMethod_OuterMethod_TwoThreads()
         {
             //arrange
-            int threadId = Thread.CurrentThread.ManagedThreadId;
             Tracer tracer = new Tracer();
             //act
             Thread thread1 = new Thread(() => { SimpleMethod(tracer); });
+            Thread thread2 = new Thread(() => { OuterMethod(tracer); });
             thread1.Start();
-            SimpleMethod(tracer);
+            thread2.Start();
             thread1.Join();
+            thread2.Join();
             TraceResult traceResult = tracer.GetTraceResult();
             //assert
             using(new AssertionScope())
@@ -106,10 +120,16 @@ namespace TestTracer
                 foreach(var method in traceResult.result)
                 {
                     method.childMethods.Count.Should().Be(1);
-                    method.childMethods[0].methodName.Should().Be("SimpleMethod");
                     method.childMethods[0].className.Should().Be("TracerDllTest");
                 }
+                traceResult.result[0].childMethods[0].methodName.Should().Be("SimpleMethod");
 
+                ReadOnlyMethodResult secondThreadMethod = traceResult.result[1].childMethods[0];
+                secondThreadMethod.methodName.Should().Be("OuterMethod");
+
+                secondThreadMethod.childMethods.Count.Should().Be(1);
+                secondThreadMethod.childMethods[0].methodName.Should().Be("InnerMethod");
+                secondThreadMethod.childMethods[0].className.Should().Be("TracerDllTest");
             }
         }
     }
