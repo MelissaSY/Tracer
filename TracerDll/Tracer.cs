@@ -8,7 +8,7 @@ namespace TracerDll
 {
     public class Tracer:ITracer
     {
-        private TraceResult _traceResult;
+        private TraceResult? _traceResult;
         private Stopwatch _stopwatch;
         private ConcurrentDictionary<int, ConcurrentStack<MethodResult>> _runningMethods;
         private ConcurrentDictionary<int, ThreadResult> _threadResult;
@@ -27,29 +27,34 @@ namespace TracerDll
             int threadId = Thread.CurrentThread.ManagedThreadId;
             StackFrame stackFrame = new StackFrame(1);
             MethodBase? methodBase = stackFrame.GetMethod();
-            Type? declaringType = methodBase.DeclaringType;
-            MethodResult methodResult;
-            MethodResult method = new MethodResult(methodBase.Name, declaringType.Name);
-            if (!_runningMethods.ContainsKey(threadId))
+            Type? declaringType = methodBase?.DeclaringType;
+            if (methodBase != null && declaringType != null)
             {
-                _runningMethods.TryAdd(threadId, new ConcurrentStack<MethodResult>());
-                _threadResult.TryAdd(threadId, new ThreadResult(threadId));
-                _threadResult[threadId].threadId = threadId;
-               // _threadResult[threadId].childMethods = new List<MethodResult>();
-                _threadResult[threadId].time = 0;
-            }
+                MethodResult? methodResult;
+                MethodResult method = new MethodResult(methodBase.Name, declaringType.Name);
+                if (!_runningMethods.ContainsKey(threadId))
+                {
+                    _runningMethods.TryAdd(threadId, new ConcurrentStack<MethodResult>());
+                    _threadResult.TryAdd(threadId, new ThreadResult(threadId));
+                    _threadResult[threadId].threadId = threadId;
+                    _threadResult[threadId].time = 0;
+                }
 
-            if (_runningMethods[threadId].IsEmpty)
-            {
-                _threadResult[threadId].AddChild(method);
+                if (_runningMethods[threadId].IsEmpty)
+                {
+                    _threadResult[threadId].AddChild(method);
+                }
+                else
+                {
+                    _runningMethods[threadId].TryPeek(out methodResult);
+                    if (methodResult != null)
+                    {
+                        methodResult.AddChild(method);
+                    }
+                }
+                _runningMethods[threadId].Push(method);
+                method.time = _stopwatch.ElapsedMilliseconds;
             }
-            else
-            {
-                _runningMethods[threadId].TryPeek(out methodResult);
-                methodResult.AddChild(method);
-            }
-            _runningMethods[threadId].Push(method);
-            method.time = _stopwatch.ElapsedMilliseconds;
         }
         
         public void StopTrace()
