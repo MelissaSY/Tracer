@@ -11,11 +11,11 @@ namespace TracerDll
     {
         public int threadId;
         public long time;
-        public ConcurrentQueue<MethodResult> childMethods;
+        public List<MethodResult> childMethods;
         public ThreadResult(int threadId)
         {
             this.threadId = threadId;
-            this.childMethods = new ConcurrentQueue<MethodResult>();
+           this.childMethods = new List<MethodResult>();
         }
         public void CountTime()
         {
@@ -26,6 +26,10 @@ namespace TracerDll
             {
                 this.time += methodResult.time;
             }
+        }
+        public void AddChild(MethodResult method)
+        {
+            childMethods.Add(method);
         }
     }
 }

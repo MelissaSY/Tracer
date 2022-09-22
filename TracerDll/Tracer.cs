@@ -35,13 +35,13 @@ namespace TracerDll
                 _runningMethods.TryAdd(threadId, new ConcurrentStack<MethodResult>());
                 _threadResult.TryAdd(threadId, new ThreadResult(threadId));
                 _threadResult[threadId].threadId = threadId;
-                _threadResult[threadId].childMethods = new ConcurrentQueue<MethodResult>();
+               // _threadResult[threadId].childMethods = new List<MethodResult>();
                 _threadResult[threadId].time = 0;
             }
 
             if (_runningMethods[threadId].IsEmpty)
             {
-                _threadResult[threadId].childMethods.Enqueue(method);
+                _threadResult[threadId].AddChild(method);
             }
             else
             {
@@ -62,7 +62,6 @@ namespace TracerDll
                 if (method != null)
                 {
                     method.time = _stopwatch.ElapsedMilliseconds - method.time;
-                //    _threadResult[threadId].time += method.time;
                 }
             }
         }

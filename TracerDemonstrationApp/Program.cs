@@ -29,10 +29,14 @@ namespace TracerDemonstrationApp
             ResultWriter resultWriter = new ResultWriter();
             resultWriter.Write(xmlResult, Console.Out);
             resultWriter.Write(jsonResult, Console.Out);
-
-
-            resultWriter.Write(jsonResult, "fff.json");
-            resultWriter.Write(xmlResult, "fff.xml");
+            using(StreamWriter sw = new StreamWriter("fff.json"))
+            {
+                resultWriter.Write(jsonResult, sw);
+            }
+            using (StreamWriter sw = new StreamWriter("fff.xml"))
+            {
+                resultWriter.Write(jsonResult, sw);
+            }
             Console.ReadLine();
         }
     }

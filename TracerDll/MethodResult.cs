@@ -12,16 +12,16 @@ namespace TracerDll
         public string methodName;
         public string className;
         public long time;
-        public ConcurrentQueue<MethodResult> childMethods;
+        public List<MethodResult> childMethods;
         public MethodResult(string methodName, string className)
         {
             this.methodName = methodName;
             this.className = className;
-            this.childMethods = new ConcurrentQueue<MethodResult>();
+            this.childMethods = new List<MethodResult>();
         }
         public void AddChild(MethodResult method)
         {
-            childMethods.Enqueue(method);
+            childMethods.Add(method);
         }
     }
 }

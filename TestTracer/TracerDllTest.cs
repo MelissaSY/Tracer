@@ -75,7 +75,41 @@ namespace TestTracer
                 methods[0].className.Should().Be("TracerDllTest");
                 methods[0].time.Should().BeGreaterThanOrEqualTo(20*_iterations);
                 threadResult.time.Should().Be(methods[0].time);
-                methods = methods[0].childMethods;
+
+
+                for(int i = 0; i < _iterations; i++)
+                {
+                    methods = methods[0].childMethods;
+                    methods.Count.Should().Be(1);
+                    methods[0].methodName.Should().Be("RecourseMethod");
+                    methods[0].className.Should().Be("TracerDllTest");
+                    methods[0].time.Should().BeGreaterThanOrEqualTo(20 *( _iterations - i));
+                }
+            }
+        }
+        [TestMethod]
+        public void SimpleMethod_TwoThreads()
+        {
+            //arrange
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Tracer tracer = new Tracer();
+            //act
+            Thread thread1 = new Thread(() => { SimpleMethod(tracer); });
+            thread1.Start();
+            SimpleMethod(tracer);
+            thread1.Join();
+            TraceResult traceResult = tracer.GetTraceResult();
+            //assert
+            using(new AssertionScope())
+            {
+                traceResult.result.Count.Should().Be(2);
+                foreach(var method in traceResult.result)
+                {
+                    method.childMethods.Count.Should().Be(1);
+                    method.childMethods[0].methodName.Should().Be("SimpleMethod");
+                    method.childMethods[0].className.Should().Be("TracerDllTest");
+                }
+
             }
         }
     }
