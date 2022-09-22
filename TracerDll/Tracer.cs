@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Diagnostics.Tracing;
+using System.IO;
 
 namespace TracerDll
 {
@@ -8,12 +10,12 @@ namespace TracerDll
     {
         private TraceResult _traceResult;
         private Stopwatch _stopwatch;
-        private ConcurrentDictionary<int, ConcurrentStack<MethodResult>> _startTime;
+        private ConcurrentDictionary<int, ConcurrentStack<MethodResult>> _runningMethods;
         private ConcurrentDictionary<int, ThreadResult> _threadResult;
         public Tracer()
         {
             _threadResult = new ConcurrentDictionary<int, ThreadResult>();
-            _startTime = new ConcurrentDictionary<int, ConcurrentStack<MethodResult>>();
+            _runningMethods = new ConcurrentDictionary<int, ConcurrentStack<MethodResult>>();
             _stopwatch = new Stopwatch();
         }
         public void StartTrace() 
@@ -24,28 +26,29 @@ namespace TracerDll
             }
             int threadId = Thread.CurrentThread.ManagedThreadId;
             StackFrame stackFrame = new StackFrame(1);
-            //add some checks here
+            MethodBase? methodBase = stackFrame.GetMethod();
+            Type? declaringType = methodBase.DeclaringType;
             MethodResult methodResult;
-            MethodResult method = new MethodResult(stackFrame.GetMethod().Name, stackFrame.GetMethod().DeclaringType.Name);
-            if (!_startTime.ContainsKey(threadId))
+            MethodResult method = new MethodResult(methodBase.Name, declaringType.Name);
+            if (!_runningMethods.ContainsKey(threadId))
             {
-                _startTime.TryAdd(threadId, new ConcurrentStack<MethodResult>());
+                _runningMethods.TryAdd(threadId, new ConcurrentStack<MethodResult>());
                 _threadResult.TryAdd(threadId, new ThreadResult(threadId));
                 _threadResult[threadId].threadId = threadId;
-                _threadResult[threadId].childMethods = new ConcurrentBag<MethodResult>();
+                _threadResult[threadId].childMethods = new ConcurrentQueue<MethodResult>();
                 _threadResult[threadId].time = 0;
             }
-            //StackTrace stackTrace = new StackTrace();
-            if (_startTime[threadId].IsEmpty)
+
+            if (_runningMethods[threadId].IsEmpty)
             {
-                _threadResult[threadId].childMethods.Add(method);
+                _threadResult[threadId].childMethods.Enqueue(method);
             }
             else
             {
-                _startTime[threadId].TryPeek(out methodResult);
+                _runningMethods[threadId].TryPeek(out methodResult);
                 methodResult.AddChild(method);
             }
-            _startTime[threadId].Push(method);
+            _runningMethods[threadId].Push(method);
             method.time = _stopwatch.ElapsedMilliseconds;
         }
         
@@ -53,13 +56,13 @@ namespace TracerDll
         {
             int threadId = Thread.CurrentThread.ManagedThreadId;
             MethodResult? method;
-            if(_startTime.ContainsKey(threadId))
+            if(_runningMethods.ContainsKey(threadId))
             {
-                _startTime[threadId].TryPop(out method);
+                _runningMethods[threadId].TryPop(out method);
                 if (method != null)
                 {
                     method.time = _stopwatch.ElapsedMilliseconds - method.time;
-                    _threadResult[threadId].time += method.time;
+                //    _threadResult[threadId].time += method.time;
                 }
             }
         }

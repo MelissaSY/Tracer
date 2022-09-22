@@ -13,6 +13,7 @@ namespace TracerDemonstrationApp
             Thread thread1 = new Thread(() => foo.MyMethod());
             thread1.Start();
             foo.MyMethod();
+            foo.MyMethod();
             Thread thread2 = new Thread(() => bar.RecourseMethod());
             thread2.Start();
             bar.RecourseMethod();
@@ -20,7 +21,6 @@ namespace TracerDemonstrationApp
             thread2.Join();
             TraceResult traceResult = tracer.GetTraceResult();
 
-        //    TraceResultSerializable result = new TraceResultSerializable(traceResult);
             XmlTraceResult xmlSerializer = new XmlTraceResult();
             JsonTraceResult jsonSerializer = new JsonTraceResult();
             string xmlResult = xmlSerializer.Serialize(traceResult);
@@ -33,7 +33,6 @@ namespace TracerDemonstrationApp
 
             resultWriter.Write(jsonResult, "fff.json");
             resultWriter.Write(xmlResult, "fff.xml");
-
             Console.ReadLine();
         }
     }
@@ -78,8 +77,8 @@ namespace TracerDemonstrationApp
         public void RecourseMethod()
         {
             _tracer.StartTrace();
-            Thread.Sleep(10 - _iterations);
-            if(_iterations < 2)
+            Thread.Sleep(Math.Abs(10 - _iterations));
+            if(_iterations < 4)
             {
                 _iterations++;
                 this.RecourseMethod();

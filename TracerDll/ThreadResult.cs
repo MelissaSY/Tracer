@@ -11,11 +11,21 @@ namespace TracerDll
     {
         public int threadId;
         public long time;
-        public ConcurrentBag<MethodResult> childMethods;
+        public ConcurrentQueue<MethodResult> childMethods;
         public ThreadResult(int threadId)
         {
             this.threadId = threadId;
-            this.childMethods = new ConcurrentBag<MethodResult>();
+            this.childMethods = new ConcurrentQueue<MethodResult>();
+        }
+        public void CountTime()
+        {
+            MethodResult[] methodResults = new MethodResult[childMethods.Count];
+            childMethods.CopyTo(methodResults, 0);
+            this.time = 0;
+            foreach(MethodResult methodResult in methodResults)
+            {
+                this.time += methodResult.time;
+            }
         }
     }
 }

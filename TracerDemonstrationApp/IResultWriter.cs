@@ -14,11 +14,5 @@ namespace TracerDemonstrationApp
         /// <param name="result"></param>
         /// <param name="stream"></param>
         public void Write(string result, TextWriter stream);
-        /// <summary>
-        /// Saves the string in the file
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="fileName"></param>
-        public void Write(string result, string fileName);
     }
 }

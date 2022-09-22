@@ -15,6 +15,7 @@ namespace TracerDll
             List<ReadOnlyThreadResult> threads = new List<ReadOnlyThreadResult>();
             foreach (var thread in threadResult)
             {
+                thread.Value.CountTime();
                 threads.Add(new ReadOnlyThreadResult(thread.Value));
             }
             result = threads;
