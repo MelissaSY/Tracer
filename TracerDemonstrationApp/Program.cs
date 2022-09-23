@@ -35,7 +35,7 @@ namespace TracerDemonstrationApp
             }
             using (StreamWriter sw = new StreamWriter("result.xml"))
             {
-                resultWriter.Write(jsonResult, sw);
+                resultWriter.Write(xmlResult, sw);
             }
             Console.ReadLine();
         }
